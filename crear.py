@@ -12,19 +12,46 @@
 
 import os
 from time import sleep
+from string import Template
 
 
 # Carga de archivo(s) plantilla.
 # Asignación de valores a variables. (con opción por defecto)
 #     Basar opción por defecto en el entorno en el que se ejecuta.
 #
+class Plantilla():
+    """
+    A partir de un archivo plantilla en el que existen $variables.
+    """
+    def __init__(self, plantilla):
+        # Abrir archivo
+        self.archivo = Template(open(plantilla).read())
+
+    def __str__(self, valores={}):
+        return self.archivo.safe_substitute(valores)
+
+
+def modulo():
+    menu(
+        nombre='crear módulo',
+        opciones={
+            1:{
+                'nombre':"Módulo plantilla",
+                'funct':opcion1
+            }
+        }
+    )
+
 
 
 def opcion1():
     """
     Opción 1
     """
-    return print("Opción 1!")
+    print("Opción 1!")
+    plantilla_readme = Plantilla('README.rst')
+    print(plantilla_readme)
+    sleep(3)
 
 
 def opcion2():
@@ -44,33 +71,32 @@ def salir():
 
 opciones_principal = {
     1: {
-        'nombre':'uno',
-        'funct': opcion1,
+        'nombre': 'Crear módulo',
+        'funct': modulo,
        },
     2:  {
-        'nombre':'dos',
+        'nombre': 'dos',
         'funct': opcion2,
        },
     3: {
-        'nombre':'tres',
+        'nombre': 'tres',
         'funct': opcion3,
-    },
-    0: {
-        'nombre':'Salir',
-        'funct': salir,
     },
 }
 
-def menu(nombre="principal",opciones=opciones_principal):
+
+def menu(nombre="principal", opciones=opciones_principal):
     """Menú principal"""
     os.system('clear')
+    opciones.update(
+        {0: {
+            'nombre': 'Salir',
+            'funct': salir,
+            },}
+        )
     print("Esto es el menú {0}".format(nombre))
-    print("""
-          1) Opción 1
-          2) Opción 2
-          3) Opción 3
-          0) Salir
-          """)
+    for opt, dict_opt in opciones.items():
+        print("{num}) {name}".format(num=str(opt), name=dict_opt['nombre']))
     try:
         opcion = int(input("Introduce una opción [0]:"))
         opciones[opcion]['funct']()
