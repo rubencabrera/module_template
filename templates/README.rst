@@ -3,20 +3,20 @@
       :alt: License
 
    ===============================================
-   $nombre_modulo_humano
+   {{ nombre_modulo_humano }}
    ===============================================
 
-   $descripcion_larga
+   {{ descripcion_larga }}
 
 Historial
 ---------
 
-$historial_de_cambios
+{{ historial_de_cambios }}
 
 Instalación
 ===========
 
-$notas_instalacion
+{{ notas_instalacion }}
 
 Créditos
 ========
@@ -24,15 +24,15 @@ Créditos
 Contribuidores
 --------------
 
-$contribuidores
+{{ contribuidores }}
 
 Maintainer
 ----------
 
-.. image:: $url_imagen_maintainer
-     :alt: $alt_imagen_maintainer
-     :target: $target_imagen
+.. image:: {{ url_imagen_maintainer }}
+     :alt: {{ alt_imagen_maintainer }}
+     :target: {{ target_imagen }}
 
- This module is maintained by $maintainer.
- $about_maintainer 
- To contribute to this module, please visit $url_contribute .
+ This module is maintained by {{ maintainer }}.
+ {{ about_maintainer }}
+ To contribute to this module, please visit {{ url_contribute }} .
