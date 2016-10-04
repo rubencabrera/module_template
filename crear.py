@@ -85,7 +85,7 @@ def newModule():
     # Carga de plantillas de archivos.
     # TODO: meter resto de plantillas
     plantillas = [
-        Plantilla('README.rst'),
+        Plantilla('templates/README.rst'),
     ]
     # Consultar datos
     # TODO: Tener valores por defecto.
