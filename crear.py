@@ -13,6 +13,7 @@
 import os
 from time import sleep
 from string import Template
+import re
 
 
 # Carga de archivo(s) plantilla.
@@ -26,32 +27,80 @@ class Plantilla():
     def __init__(self, plantilla):
         # Abrir archivo
         self.archivo = Template(open(plantilla).read())
+        self.template = self.archivo.template
 
-    def __str__(self, valores={}):
+    def __str__(self):
+        return self.template
+
+    def safe_substitute(self, valores={}):
+        """
+        Sustituye los tokens de la plantilla, intentando evitar excepciones.
+        """
         return self.archivo.safe_substitute(valores)
+
+    def get_keys(self):
+        """
+        Devuelve una lista con las variables de la plantilla
+        """
+        # Obtener las variables de la plantilla
+        resultado = re.findall(self.archivo.pattern, self.archivo.template)
+        # Devuelve el segundo elemento de la tupla.
+        return [r[1] for r in resultado]
+
+
+def addField():
+    """
+    Crea una plantilla de módulo para añadir un campo.
+    """
+    # Nombre del modelo.
+    # Nombre del campo.
+    # Tipo de campo.
+    #   Si es relacional: comodel_name...
+    #
+    print("Creando campo...")
+    sleep(1)
 
 
 def modulo():
     menu(
         nombre='crear módulo',
         opciones={
-            1:{
-                'nombre':"Módulo plantilla",
-                'funct':opcion1
-            }
+            1: {
+                'nombre': "Módulo plantilla",
+                'funct': newModule,
+            },
+            2: {
+                'nombre': "Añadir Campo",
+                'funct': addField,
+            },
         }
     )
 
 
-
-def opcion1():
+def newModule():
     """
-    Opción 1
+    Crear un nuevo módulo a partir de plantillas básicas.
     """
-    print("Opción 1!")
-    plantilla_readme = Plantilla('README.rst')
-    print(plantilla_readme)
-    sleep(3)
+    print("Crear nuevo módulo")
+    # Carga de plantillas de archivos.
+    # TODO: meter resto de plantillas
+    plantillas = [
+        Plantilla('README.rst'),
+    ]
+    # Consultar datos
+    # TODO: Tener valores por defecto.
+    for plant in plantillas:
+        variables = {}
+        for token in plant.get_keys():
+            variables.update(
+                {
+                    token: input(
+                            "Introduce un valor para {0}:".format(token))
+                }
+            )
+        print("Esto es la plantilla:")
+        print(plant.safe_substitute(variables))
+        input()
 
 
 def opcion2():
@@ -89,10 +138,12 @@ def menu(nombre="principal", opciones=opciones_principal):
     """Menú principal"""
     os.system('clear')
     opciones.update(
-        {0: {
-            'nombre': 'Salir',
-            'funct': salir,
-            },}
+        {
+            0: {
+                'nombre': 'Salir',
+                'funct': salir,
+            },
+        }
         )
     print("Esto es el menú {0}".format(nombre))
     for opt, dict_opt in opciones.items():
