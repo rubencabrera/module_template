@@ -12,8 +12,21 @@
 
 import os
 from time import sleep
-from string import Template
-import re
+
+
+def salir():
+    """
+    Salir del script.
+    TODO: Capturar SIGINT con el módulo signal y mostrar texto al salir.
+    """
+    raise SystemExit()
+
+
+try:
+    from jinja2 import Template, Environment, meta
+except ImportError:
+    print("No se ha podido importar jinja2")
+    salir()
 
 
 # Carga de archivo(s) plantilla.
@@ -24,28 +37,34 @@ class Plantilla():
     """
     A partir de un archivo plantilla en el que existen $variables.
     """
-    def __init__(self, plantilla):
+
+    def _get_vars(self, path):
+        """
+        Dada la ruta de una plantilla, extraer todas sus variables para poder
+        pasárselas luego.
+            @path: ruta del archivo relativa a este script.
+            returns:
+                variables - Un diccionario con las variables como claves
+                            (sin valores asignados, a priori)
+        """
+        entorno = Environment()
+        arbol_de_sintaxis = entorno.parse(open(path).read())
+        variables = meta.find_undeclared_variables(arbol_de_sintaxis)
+        return variables
+
+    def __init__(self, template_path):
         # Abrir archivo
-        self.archivo = Template(open(plantilla).read())
-        self.template = self.archivo.template
+        self.template = Template(open(template_path).read())
+        self.variables = self._get_vars(template_path)
 
     def __str__(self):
-        return self.template
+        return str(self.template)
 
     def safe_substitute(self, valores={}):
         """
         Sustituye los tokens de la plantilla, intentando evitar excepciones.
         """
         return self.archivo.safe_substitute(valores)
-
-    def get_keys(self):
-        """
-        Devuelve una lista con las variables de la plantilla
-        """
-        # Obtener las variables de la plantilla
-        resultado = re.findall(self.archivo.pattern, self.archivo.template)
-        # Devuelve el segundo elemento de la tupla.
-        return [r[1] for r in resultado]
 
 
 def addField():
@@ -84,14 +103,15 @@ def newModule():
     print("Crear nuevo módulo")
     # Carga de plantillas de archivos.
     # TODO: meter resto de plantillas
+    readme = Plantilla('templates/README.rst')
     plantillas = [
-        Plantilla('templates/README.rst'),
+        readme,
     ]
     # Consultar datos
     # TODO: Tener valores por defecto.
     for plant in plantillas:
         variables = {}
-        for token in plant.get_keys():
+        for token in plant.variables:
             variables.update(
                 {
                     token: input(
@@ -99,7 +119,7 @@ def newModule():
                 }
             )
         print("Esto es la plantilla:")
-        print(plant.safe_substitute(variables))
+        print(plant.template.render(variables))
         input()
 
 
@@ -109,10 +129,6 @@ def opcion2():
 
 def opcion3():
     print("Opción 3!")
-
-
-def salir():
-    raise SystemExit()
 
 
 # Pantalla de bienvenida. Menú de opciones.
