@@ -6,17 +6,17 @@
    {{ nombre_modulo_humano }}
    ===============================================
 
-   {{ descripcion_larga }}
+   {{ descripcion_larga|default('Descripción del módulo') }}
 
 Historial
 ---------
 
-{{ historial_de_cambios }}
+{{ historial_de_cambios|default('*') }}
 
 Instalación
 ===========
 
-{{ notas_instalacion }}
+{{ notas_instalacion|default('Notas de instalación') }}
 
 Créditos
 ========
