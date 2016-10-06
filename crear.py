@@ -96,31 +96,109 @@ def modulo():
     )
 
 
+def folderTree(path):
+    """
+    Dada una ruta a través de path, crear la estructura de directorios de un
+    módulo básico.
+    """
+    if type(path) != str:
+        path = str(path)
+    if not path.startswith('/'):
+        print("La ruta no es relativa, calculando ruta absoluta...")
+        path = os.path.abspath(path)
+    if not os.path.isdir(path):
+        print('La ruta proporcionada ({0}) no existe.'.format(path))
+        salir()
+    else:
+        if path.endswith('/'):
+            path.rstrip('/')
+    nombre_del_modulo = input('Introduce el nombre del módulo a crear: ')
+    ruta_modulo = '/'.join((path, nombre_del_modulo))
+    os.makedirs(ruta_modulo)
+    os.makedirs('/'.join((ruta_modulo, 'models')))
+    os.makedirs('/'.join((ruta_modulo, 'views')))
+
+
 def newModule():
     """
     Crear un nuevo módulo a partir de plantillas básicas.
     """
-    print("Crear nuevo módulo")
-    # Carga de plantillas de archivos.
-    # TODO: meter resto de plantillas
-    readme = Plantilla('templates/README.rst')
-    plantillas = [
-        readme,
-    ]
+    n = False
+    ruta = input("Introduce la ruta donde se creará el módulo [./]: ") or './'
+    folderTree(ruta)
+    rellenarPlantilla(nombre="README", ruta='templates/README.rst')
+    while type(n) != int:
+        n = input("Cuántos modelos quieres crear? ")
+        try:
+            n = int(n)
+        except ValueError:
+            print("¡Introduce un número!")
+    for n in range(n):
+        rellenarPlantilla(
+            nombre="módulo",
+            ruta='templates/models/model_template.py')
+
+
+def modificarVariable(variables, nombre):
+    """
+    Dado un diccionario de variables, modificar el valor de una de ellas.
+    """
+    variables.update({
+                    nombre: input(
+                            "Introduce un nuevo valor para {0}".format(nombre)
+                        )
+                    }
+                    )
+    return variables
+
+
+def rellenarPlantilla(ruta, nombre='plantilla'):
+    """
+    Dada la ruta de una plantilla, esta función la rellena consultando al
+    usuario.
+        @ruta: cadena con la ruta de la plantilla, absoluta o relativa.
+    """
+    os.system('clear')
+    print("Rellenar {0}".format(nombre))
+    # TODO: Mostrar el nombre de la plantilla en la primera línea del terminal
+    #       para saber qué estamos haciendo.
+    # TODO: meter resto de plantillas, mejor en un bucle que llame a esta
+    #       función
+    plantilla = Plantilla(ruta)
     # Consultar datos
     # TODO: Tener valores por defecto.
-    for plant in plantillas:
-        variables = {}
-        for token in plant.variables:
-            variables.update(
-                {
-                    token: input(
-                            "Introduce un valor para {0}:".format(token))
-                }
+    variables = {}
+    for token in plantilla.variables:
+        variables.update(
+            {
+                token: input(
+                        "Introduce un valor para {0}:".format(token))
+            }
             )
-        print("Esto es la plantilla:")
-        print(plant.template.render(variables))
-        input()
+    print("Este es el archivo que se va a crear: {0}".format(
+                                        plantilla.template.render(variables)))
+    validacion = input('¿Es correcto? (Sí/No)[S]: ')
+    # TODO: Si no se valida el archivo, ofrecer una lista de variables y
+    # corregir la que toque.
+    if validacion.lower() == 's':
+        return plantilla.template.render(variables)
+    elif validacion.lower() == 'n':
+        # Mostrar lista de las variables:
+        # claves = list(variables.keys())
+        # menu(nombre="para corregir variables", opciones={
+                                        # claves.index(
+                                            # variable): {
+                                            # 'nombre': str(variable),
+                                            # 'funct': modificarVariable,
+                                            # 'param': {
+                                                # 'variables': variables,
+                                                # 'nombre': str(variable)
+                                            # }}
+                                        # for variable, valor in variables
+                                                        # })
+        pass
+    else:
+        print("Respuesta no válida")
 
 
 def opcion2():
@@ -150,8 +228,17 @@ opciones_principal = {
 }
 
 
-def menu(nombre="principal", opciones=opciones_principal):
-    """Menú principal"""
+def menu(nombre="principal", opciones=opciones_principal, parametros={}):
+    """
+    Menú
+        @nombre: nombre del menú para mostrarlo en la interfaz.
+        @opciones: diccionario en el que las claves son el número
+                    del menú y los valores son otro diccionario fomrado por:
+                        nombre: nombre a mostrar en el menú.
+                        funct: función (callable) a llamar.
+                        param: diccionario de parámetros a pasar a
+                                la función.
+    """
     os.system('clear')
     opciones.update(
         {
@@ -166,16 +253,18 @@ def menu(nombre="principal", opciones=opciones_principal):
         print("{num}) {name}".format(num=str(opt), name=dict_opt['nombre']))
     try:
         opcion = int(input("Introduce una opción [0]:"))
+        # pasar = parametros or opciones[opcion]['param']
+        # if pasar: opciones[opcion]['funct'](**pasar)
+        # else: opciones[opcion]['funct']()
         opciones[opcion]['funct']()
     except ValueError:
         print("Opción inválida")
         sleep(1)
-        menu()
+        menu(nombre, opciones, parametros)
     except KeyError:
         print("Opción no válida")
         sleep(1)
-        menu()
-    menu()
+        menu(nombre, opciones, parametros)
 
 # Opciones:
 
@@ -193,4 +282,5 @@ def menu(nombre="principal", opciones=opciones_principal):
 
 
 if __name__ == '__main__':
-    menu()
+    while True:
+        menu()
